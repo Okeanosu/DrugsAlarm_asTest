@@ -71,5 +71,5 @@ DrugsAlarm là một ứng dụng Android giúp bạn quản lý việc uống t
 ## Cài đặt
 
 1. Clone repository.
-2. Mở bằng **Android Studio)**.
+2. Mở bằng **Android Studio**.
 3. Requirement: JDK 11.
