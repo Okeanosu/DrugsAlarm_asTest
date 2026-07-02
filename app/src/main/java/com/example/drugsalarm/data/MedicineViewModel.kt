@@ -4,8 +4,15 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.util.Calendar
+
+data class DailyStats(
+    val date: Long,
+    val takenCount: Int,
+    val missedCount: Int
+)
 
 class MedicineViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = AppDatabase.getDatabase(application).medicineDao()
@@ -13,6 +20,44 @@ class MedicineViewModel(application: Application) : AndroidViewModel(application
     
     val allMedicines: Flow<List<Medicine>> = dao.getAllMedicinesFlow()
     val allLogs: Flow<List<IntakeLog>> = dao.getAllLogs()
+
+    val weeklyStats: Flow<List<DailyStats>> = allLogs.map { logs ->
+        val statsMap = mutableMapOf<Long, Pair<Int, Int>>()
+        val cal = Calendar.getInstance()
+        
+        // Initialize last 7 days
+        for (i in 0..6) {
+            val dateCal = Calendar.getInstance()
+            dateCal.add(Calendar.DAY_OF_YEAR, -i)
+            dateCal.set(Calendar.HOUR_OF_DAY, 0)
+            dateCal.set(Calendar.MINUTE, 0)
+            dateCal.set(Calendar.SECOND, 0)
+            dateCal.set(Calendar.MILLISECOND, 0)
+            statsMap[dateCal.timeInMillis] = Pair(0, 0)
+        }
+
+        logs.forEach { log ->
+            cal.timeInMillis = log.intakeTime
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            val dayStart = cal.timeInMillis
+            
+            if (statsMap.containsKey(dayStart)) {
+                val current = statsMap[dayStart]!!
+                if (log.status == "Taken") {
+                    statsMap[dayStart] = Pair(current.first + 1, current.second)
+                } else if (log.status == "Missed") {
+                    statsMap[dayStart] = Pair(current.first, current.second + 1)
+                }
+            }
+        }
+
+        statsMap.entries.sortedBy { it.key }.map { 
+            DailyStats(it.key, it.value.first, it.value.second)
+        }
+    }
 
     fun addMedicine(name: String, dosage: String, frequency: String, timeInMillis: Long, quantity: Int) {
         viewModelScope.launch {
@@ -49,7 +94,6 @@ class MedicineViewModel(application: Application) : AndroidViewModel(application
             if (medicine.remainingQuantity > 0) {
                 dao.decrementQuantity(medicine.id)
                 
-                // Check if there's a recent "Missed" entry to convert
                 val latestMissed = dao.getLatestMissedLog(medicine.id)
                 if (latestMissed != null) {
                     dao.updateIntakeLog(latestMissed.copy(

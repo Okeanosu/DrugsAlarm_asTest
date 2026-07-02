@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.drugsalarm.MainActivity
@@ -27,7 +29,7 @@ class AlarmReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             val medicine = db.medicineDao().getMedicineById(medicineId)
             medicine?.let {
-                // 1. Record as "Missed" initially
+                // 1. Ghi nhận là "Missed" ban đầu
                 val missedLog = IntakeLog(
                     medicineId = it.id,
                     medicineName = it.name,
@@ -36,10 +38,10 @@ class AlarmReceiver : BroadcastReceiver() {
                 )
                 db.medicineDao().insertIntakeLog(missedLog)
 
-                // 2. Show notification
+                // 2. Hiển thị thông báo kèm chuông báo thức
                 showNotification(context, it.name, it.id)
 
-                // 3. Reschedule for the next occurrence if it's a repeating medication
+                // 3. Đặt lịch cho lần kế tiếp
                 if (it.frequency != "Once") {
                     val nextTime = scheduler.calculateNextOccurrence(it.timeInMillis, it.frequency)
                     val updatedMedicine = it.copy(timeInMillis = nextTime)
@@ -53,6 +55,10 @@ class AlarmReceiver : BroadcastReceiver() {
     private fun showNotification(context: Context, medicineName: String, medicineId: Int) {
         val channelId = "medicine_reminders"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        // Lấy âm thanh báo thức mặc định của hệ thống
+        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -62,6 +68,12 @@ class AlarmReceiver : BroadcastReceiver() {
             ).apply {
                 description = "Reminders to take your medicine"
                 enableVibration(true)
+                // Thiết lập âm thanh cho Channel (Android 8.0+)
+                val audioAttributes = AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .build()
+                setSound(alarmSound, audioAttributes)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -90,15 +102,15 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Medicine Reminder")
-            .setContentText("Time to take your medication: $medicineName")
+            .setContentTitle("Đến giờ uống thuốc!")
+            .setContentText("Bạn cần uống: $medicineName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setSound(alarmSound) // Thiết lập âm thanh cho các bản Android cũ hơn
             .setAutoCancel(true)
             .setContentIntent(mainPendingIntent)
             .setFullScreenIntent(mainPendingIntent, true)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .addAction(android.R.drawable.ic_menu_edit, "Taken", takePendingIntent)
+            .addAction(android.R.drawable.ic_menu_edit, "Đã uống", takePendingIntent)
 
         notificationManager.notify(medicineId, builder.build())
     }
