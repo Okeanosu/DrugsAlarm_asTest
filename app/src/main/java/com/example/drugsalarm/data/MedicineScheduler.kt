@@ -63,9 +63,11 @@ class MedicineScheduler(private val context: Context) {
         // Loop to find the next valid time in the future
         while (calendar.before(now) || calendar.timeInMillis <= now.timeInMillis) {
             when (frequency) {
-                "1 hour" -> calendar.add(Calendar.HOUR_OF_DAY, 1)
-                "2 hours" -> calendar.add(Calendar.HOUR_OF_DAY, 2)
-                "3 hours" -> calendar.add(Calendar.HOUR_OF_DAY, 3)
+                "Every 1 Hour" -> calendar.add(Calendar.HOUR_OF_DAY, 1)
+                "Every 2 Hours" -> calendar.add(Calendar.HOUR_OF_DAY, 2)
+                "Every 4 Hours" -> calendar.add(Calendar.HOUR_OF_DAY, 4)
+                "Every 8 Hours" -> calendar.add(Calendar.HOUR_OF_DAY, 8)
+                "Every 12 Hours" -> calendar.add(Calendar.HOUR_OF_DAY, 12)
                 "Daily" -> calendar.add(Calendar.DAY_OF_YEAR, 1)
                 "Weekly" -> calendar.add(Calendar.WEEK_OF_YEAR, 1)
                 "Every 2 Weeks" -> calendar.add(Calendar.WEEK_OF_YEAR, 2)
