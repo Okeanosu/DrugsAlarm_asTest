@@ -50,7 +50,6 @@ DrugsAlarm là một ứng dụng Android giúp bạn quản lý việc uống t
 
 ----------------
 
-*(Bạn có thể chèn link ảnh thực tế vào đây)*
 - [Màn hình danh sách thuốc]
   <img width="351" height="777" alt="image" src="https://github.com/user-attachments/assets/001b350a-ae89-4c43-b8e0-ad65ca6e5bce" />
 - [Biểu đồ thống kê]
