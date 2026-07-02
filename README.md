@@ -50,14 +50,21 @@ DrugsAlarm là một ứng dụng Android giúp bạn quản lý việc uống t
 
 ----------------
 
-- [Màn hình danh sách thuốc]
+## Màn hình danh sách thuốc
+
   <img width="351" height="777" alt="image" src="https://github.com/user-attachments/assets/001b350a-ae89-4c43-b8e0-ad65ca6e5bce" />
-- [Biểu đồ thống kê]
+  
+## Biểu đồ thống kê
+
   <img width="350" height="779" alt="image" src="https://github.com/user-attachments/assets/6f18535d-0e52-47d1-8f59-56b5b269ad01" />
+  
   <img width="355" height="779" alt="image" src="https://github.com/user-attachments/assets/5d4782ff-1f2a-44f2-8f2f-bd82b14d6ba8" />
+  
   <img width="349" height="774" alt="image" src="https://github.com/user-attachments/assets/9b539aae-8055-4404-9a0c-1715631f48c3" />
-- [Thông báo nhắc nhở]
-<img width="349" height="781" alt="image" src="https://github.com/user-attachments/assets/cbd2c4f8-7f85-4fde-87b0-a2cc2899fc64" />
+  
+## Thông báo nhắc nhở
+
+  <img width="349" height="781" alt="image" src="https://github.com/user-attachments/assets/cbd2c4f8-7f85-4fde-87b0-a2cc2899fc64" />
 
 ----------------
 
